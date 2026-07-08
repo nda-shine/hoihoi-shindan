@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マルチホイホイ耐性診断</title>
+<link href="https://fonts.googleapis.com/css2?family=Yuji+Syuku&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FCF8EC;
+    --ink:#2B3A55;
+    --mustard:#E0A526;
+    --azuki:#A64B4B;
+    --stamp:#C0392B;
+    --soft:#EFE7D2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'Zen Maru Gothic',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px 16px;
+    background-image:radial-gradient(circle at 20% 10%, rgba(224,165,38,.06) 0 120px, transparent 120px),
+                     radial-gradient(circle at 85% 90%, rgba(166,75,75,.05) 0 140px, transparent 140px);
+  }
+  .card{
+    width:100%;
+    max-width:420px;
+    background:#fff;
+    border:2px solid var(--ink);
+    border-radius:18px;
+    padding:28px 24px 32px;
+    box-shadow:6px 6px 0 rgba(43,58,85,.12);
+    position:relative;
+    overflow:hidden;
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.25em;
+    text-align:center;
+    color:var(--azuki);
+    margin-bottom:6px;
+  }
+  h1{
+    font-family:'Yuji Syuku',serif;
+    font-size:26px;
+    text-align:center;
+    line-height:1.4;
+    margin-bottom:4px;
+  }
+  .sub{
+    text-align:center;
+    font-size:12.5px;
+    color:#6b7690;
+    margin-bottom:20px;
+  }
+  .divider{
+    border:none;
+    border-top:1.5px dashed var(--soft);
+    margin:0 0 20px;
+  }
+  .qnum{
+    display:inline-block;
+    font-size:12px;
+    font-weight:700;
+    background:var(--ink);
+    color:var(--paper);
+    padding:3px 12px;
+    border-radius:999px;
+    margin-bottom:14px;
+  }
+  .qtext{
+    font-size:17px;
+    font-weight:500;
+    line-height:1.8;
+    min-height:4.5em;
+    margin-bottom:22px;
+    white-space:pre-line;
+  }
+  .btns{display:flex;flex-direction:column;gap:12px}
+  button.choice{
+    font-family:'Zen Maru Gothic',sans-serif;
+    font-size:16px;
+    font-weight:700;
+    padding:15px 18px;
+    border-radius:12px;
+    border:2px solid var(--ink);
+    background:var(--paper);
+    color:var(--ink);
+    cursor:pointer;
+    transition:transform .08s ease, background .15s ease;
+    text-align:left;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  button.choice .mark{
+    flex-shrink:0;
+    width:26px;height:26px;
+    border-radius:50%;
+    border:2px solid var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;
+    font-weight:700;
+  }
+  button.choice.yes .mark{background:var(--mustard);border-color:var(--mustard);color:#fff}
+  button.choice.no .mark{background:var(--azuki);border-color:var(--azuki);color:#fff}
+  button.choice:active{transform:scale(.97);background:var(--soft)}
+  button.choice:focus-visible{outline:3px solid var(--mustard);outline-offset:2px}
+  .progress{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-top:24px;
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--soft);
+    transition:background .3s;
+  }
+  .dot.on{background:var(--mustard)}
+
+  /* 結果画面 */
+  .result-label{
+    text-align:center;
+    font-size:12px;
+    letter-spacing:.3em;
+    color:#6b7690;
+    margin-bottom:10px;
+  }
+  .type-name{
+    font-family:'Yuji Syuku',serif;
+    font-size:30px;
+    text-align:center;
+    line-height:1.4;
+    margin-bottom:18px;
+  }
+  .stamp{
+    width:120px;height:120px;
+    margin:0 auto 20px;
+    border:4px solid var(--stamp);
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Yuji Syuku',serif;
+    font-size:20px;
+    color:var(--stamp);
+    text-align:center;
+    line-height:1.3;
+    transform:rotate(-8deg) scale(3);
+    opacity:0;
+    padding:10px;
+  }
+  .stamp.landed{
+    animation:stampIn .45s cubic-bezier(.2,1.6,.4,1) forwards;
+  }
+  @keyframes stampIn{
+    0%{transform:rotate(-8deg) scale(3);opacity:0}
+    60%{transform:rotate(-8deg) scale(.92);opacity:1}
+    100%{transform:rotate(-8deg) scale(1);opacity:.92}
+  }
+  .comment{
+    font-size:14.5px;
+    line-height:2;
+    background:var(--paper);
+    border:1.5px dashed var(--soft);
+    border-radius:12px;
+    padding:16px 18px;
+    margin-bottom:22px;
+    white-space:pre-line;
+  }
+  .retry{
+    display:block;
+    width:100%;
+    font-family:'Zen Maru Gothic',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    padding:14px;
+    border-radius:12px;
+    border:2px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper);
+    cursor:pointer;
+    transition:transform .08s ease;
+  }
+  .retry:active{transform:scale(.97)}
+  .retry:focus-visible{outline:3px solid var(--mustard);outline-offset:2px}
+  .footnote{
+    text-align:center;
+    font-size:10.5px;
+    color:#9aa3b8;
+    margin-top:14px;
+  }
+  .fade{animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){
+    .fade,.stamp.landed{animation:none;opacity:1;transform:rotate(-8deg) scale(1)}
+  }
+</style>
+</head>
+<body>
+<div class="card" id="card"></div>
+
+<script>
+const questions = {
+  q1:{
+    num:"Q1",
+    text:"高校時代の友達から急に\n「久しぶり！今度会わない？」\nとLINEがきた。",
+    yes:{label:"行く", next:"q2"},
+    no:{label:"行かない", next:"q5"},
+    step:1
+  },
+  q2:{
+    num:"Q2",
+    text:"会ったら開口一番、\n「最近すごい人に出会って\n人生変わったの」",
+    yes:{label:"詳しく聞く", next:"q3"},
+    no:{label:"嫌な予感がする", next:"q5"},
+    step:2
+  },
+  q3:{
+    num:"Q3",
+    text:"「今度その人のセミナー、\n一緒に行かない？無料だよ」",
+    yes:{label:"無料なら行く", next:"A"},
+    no:{label:"ここで断る", next:"q4"},
+    step:3
+  },
+  q4:{
+    num:"Q4",
+    text:"断ったら\n「あなたのために言ってるのに」\nと言われた。",
+    yes:{label:"ちょっと揺らぐ", next:"B"},
+    no:{label:"確信に変わる", next:"C"},
+    step:4
+  },
+  q5:{
+    num:"Q5",
+    text:"でも「元気にしてるかな」と\n相手のSNSだけ見に行く？",
+    yes:{label:"見に行く", next:"C"},
+    no:{label:"見ない", next:"D"},
+    step:4
+  }
+};
+
+const results = {
+  A:{
+    name:"ホイホイ入店中",
+    stamp:"要注意",
+    comment:"ようこそ。\n出口はLINEブロックです。\n「無料」はいちばん高い入場券。"
+  },
+  B:{
+    name:"網の縁で足踏み",
+    stamp:"あと一歩",
+    comment:"「あなたのため」は9割、\n「私のノルマのため」です。\n揺らいだ自分を責めなくていいけど、\n足は縁の外へ。"
+  },
+  C:{
+    name:"検知器搭載済み",
+    stamp:"実地検定\n合格",
+    comment:"匂いでわかる人。\nたぶん一度、捕まったことがある。\nその経験、いまは現役の検知器です。"
+  },
+  D:{
+    name:"網に近寄らない",
+    stamp:"天然記念物",
+    comment:"防御本能の完成形。\nわからないものには近寄らない。\nその警戒心、立派な資産です。"
+  }
+};
+
+const card = document.getElementById("card");
+
+function renderStart(){
+  card.innerHTML = `
+    <div class="fade">
+      <p class="eyebrow">Y E S ／ N O チャート</p>
+      <h1>マルチホイホイ<br>耐性診断</h1>
+      <p class="sub">〜あなたの嗅覚は働いてる？〜</p>
+      <hr class="divider">
+      <p class="qtext" style="text-align:center;min-height:auto;">直感でタップしてください。<br>全4〜5問、30秒で終わります。<br><span style="font-size:12px;color:#9aa3b8;">※30秒でスキを押す人より長いです</span></p>
+      <div class="btns">
+        <button class="choice yes" onclick="renderQ('q1')"><span class="mark">始</span>診断をはじめる</button>
+      </div>
+    </div>`;
+}
+
+function renderQ(id){
+  const q = questions[id];
+  const dots = [1,2,3,4].map(n=>`<span class="dot ${n<=q.step?'on':''}"></span>`).join("");
+  card.innerHTML = `
+    <div class="fade">
+      <span class="qnum">${q.num}</span>
+      <p class="qtext">${q.text}</p>
+      <div class="btns">
+        <button class="choice yes" onclick="go('${q.yes.next}')"><span class="mark">は</span>${q.yes.label}</button>
+        <button class="choice no" onclick="go('${q.no.next}')"><span class="mark">い</span>${q.no.label}</button>
+      </div>
+      <div class="progress">${dots}</div>
+    </div>`;
+}
+
+function go(next){
+  if(results[next]) renderResult(next);
+  else renderQ(next);
+}
+
+function renderResult(key){
+  const r = results[key];
+  card.innerHTML = `
+    <div class="fade">
+      <p class="result-label">診断結果</p>
+      <p class="type-name">${key}タイプ<br>【${r.name}】</p>
+      <div class="stamp" id="stamp">${r.stamp}</div>
+      <p class="comment">${r.comment}</p>
+      <button class="retry" onclick="renderStart()">もう一度診断する</button>
+      <p class="footnote">この診断に医学的・法的根拠はありません。嗅覚には根拠があります。</p>
+    </div>`;
+  requestAnimationFrame(()=>{
+    setTimeout(()=>document.getElementById("stamp").classList.add("landed"),200);
+  });
+}
+
+renderStart();
+</script>
+</body>
+</html>
